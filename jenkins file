@@ -1,0 +1,37 @@
+pipeline {
+  agent any
+  environment {
+  AWS_DEFAULT_REGION = 'ap-south-1'
+  AWS_ACCOUNT_ID = '269744751587'
+}
+  stages {
+    stage('checkout') {
+      steps {
+    git branch: 'main',
+        url: 'https://github.com/Shraddhabgit/my-3-tier-app-project',
+        credentialsId: 'github-cred'
+  }
+    }
+    stage('Frontend docker build ') {
+      steps {
+        sh 'docker build -t my-frontend:latest -f frontend/Dockerfile frontend/'
+      }
+    }
+    stage('Frontend PUSH to ECR') {
+      steps {
+         sh '''
+      # Login to ECR
+      aws ecr get-login-password --region ap-south-1 | \
+        docker login --username AWS --password-stdin 269744751587.dkr.ecr.ap-south-1.amazonaws.com
+
+      # Tag image
+      docker tag my-frontend:latest \
+        269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-frontend:latest
+
+      # Push image
+      docker push 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-frontend:latest
+    '''
+      }
+    }
+  }
+}
