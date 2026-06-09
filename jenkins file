@@ -1,9 +1,5 @@
 pipeline {
   agent any
-  environment {
-  AWS_DEFAULT_REGION = 'ap-south-1'
-  AWS_ACCOUNT_ID = '269744751587'
-}
   stages {
     stage('checkout') {
       steps {
