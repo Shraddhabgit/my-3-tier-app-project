@@ -1,1 +1,13 @@
-test
+Unified Jenkins Pipeline Flow:
+
+1) Checkout code for frontend, backend, and DB.
+
+2) Build & test each tier.
+
+3) Dockerize & push images to ECR.
+
+4) Update manifests (frontend-deployment.yaml, backend-deployment.yaml, db-statefulset.yaml).
+
+5) Commit & push manifest changes to Git.
+
+6) ArgoCD syncs and applies changes to staging/production cluster.
