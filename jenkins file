@@ -13,6 +13,11 @@ pipeline {
         sh 'docker build -t my-frontend:latest -f frontend/Dockerfile frontend/'
       }
     }
+    stage('Backend docker build ') {
+      steps {
+        sh 'docker build -t my-backend:latest -f backend/Dockerfile backend/'
+      }
+    }
     stage('Frontend PUSH to ECR') {
       steps {
          sh '''
@@ -28,6 +33,17 @@ pipeline {
       docker push 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-frontend:latest
     '''
       }
+    }
+    stage('Backend Push to ECR'){
+        steps{
+            sh '''
+            docker tag my-backend:latest \
+        269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-backend:latest
+
+      # Push image
+      docker push 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-backend:latest
+    '''
+        }
     }
   }
 }
