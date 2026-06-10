@@ -1,0 +1,3 @@
+sonar.projectKey=vulnerable-app
+sonar.projectName=Vulnerable App
+sonar.sources=.
