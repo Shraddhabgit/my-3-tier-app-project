@@ -8,28 +8,30 @@ pipeline {
         credentialsId: 'github-cred'
   }
     }
- stage('sonarqube for frontend'){
+ stage('sonarqube'){
         steps{
             withSonarQubeEnv('Sonarqube') {   // Must match the server name in Jenkins config
             withCredentials([string(credentialsId: 'sonar-cred', variable: 'SONAR_TOKEN')]) {
                 sh '''
                   sonar-scanner \
-                    -Dsonar.projectKey=frontend \
+                    -Dsonar.projectKey=3-tier-app \
                     -Dsonar.sources=. \
                     -Dsonar.host.url=${SONAR_HOST_URL} \
-                    -Dsonar.login=${SONAR_TOKEN}
+                    -Dsonar.token=${SONAR_TOKEN}
                 '''
+    sh 'echo ${SONAR_HOST_URL}'
             }
         }
 }
 }
-stage('Quality Gate for frontend') {
+stage('Quality Gate') {
     steps {
-        timeout(time: 1, unit: 'MINUTES') {
+        timeout(time: 5, unit: 'MINUTES') {
             waitForQualityGate abortPipeline: true
         }
     }
 }
+
     stage('Frontend docker build ') {
       steps {
         sh 'docker build -t my-frontend:latest -f frontend/Dockerfile frontend/'
