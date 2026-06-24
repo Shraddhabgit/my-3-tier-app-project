@@ -12,5 +12,7 @@ Unified Jenkins Pipeline Flow:
 
 6) ArgoCD syncs and applies changes to staging/production cluster.
 
-7) Do it
+7) For jenkins, Do not use “Trigger builds remotely” unless you want to call /build?token=... manually. Instead Under Build Triggers, check:
+
+GitHub hook trigger for GITScm polling (preferred).
 
