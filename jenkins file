@@ -8,6 +8,7 @@ pipeline {
         credentialsId: 'github-cred'
   }
     }
+
  stage('sonarqube'){
         steps{
             withSonarQubeEnv('sonarqube') {   // Must match the server name in Jenkins config
