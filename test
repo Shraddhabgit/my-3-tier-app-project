@@ -4,7 +4,7 @@ Unified Jenkins Pipeline Flow:
 
 2) Build & test each tier.
 
-3) Dockerize & push images to ECR.
+3) Dockerize & push images to ECR..
 
 4) Update manifests (frontend-deployment.yaml, backend-deployment.yaml, db-statefulset.yaml).
 
