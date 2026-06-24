@@ -10,9 +10,10 @@ pipeline {
     }
  stage('sonarqube'){
         steps{
-            withSonarQubeEnv('Sonarqube') {   // Must match the server name in Jenkins config
+            withSonarQubeEnv('sonarqube') {   // Must match the server name in Jenkins config
             withCredentials([string(credentialsId: 'sonar-cred', variable: 'SONAR_TOKEN')]) {
                 sh '''
+                  cd $WORKSPACE
                   sonar-scanner \
                     -Dsonar.projectKey=3-tier-app \
                     -Dsonar.sources=. \
@@ -23,13 +24,6 @@ pipeline {
             }
         }
 }
-}
-stage('Quality Gate') {
-    steps {
-        timeout(time: 5, unit: 'MINUTES') {
-            waitForQualityGate abortPipeline: true
-        }
-    }
 }
 
     stage('Frontend docker build ') {
@@ -70,4 +64,10 @@ stage('Quality Gate') {
         }
     }
   }
+    post {
+    success {
+        archiveArtifacts artifacts: '.scannerwork/report-task.txt', fingerprint: true
+        build job: 'QualityGateCheck', propagate: false
+       }
+     }
 }
