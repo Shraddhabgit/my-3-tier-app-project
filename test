@@ -12,5 +12,5 @@ Unified Jenkins Pipeline Flow:
 
 6) ArgoCD syncs and applies changes to staging/production cluster.
 
-7) Do
+7) Do it
 
