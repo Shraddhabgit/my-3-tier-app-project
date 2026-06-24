@@ -11,3 +11,4 @@ Unified Jenkins Pipeline Flow:
 5) Commit & push manifest changes to Git.
 
 6) ArgoCD syncs and applies changes to staging/production cluster.
+7) 
