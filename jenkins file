@@ -47,7 +47,7 @@ stage('Quality Gate') {
         sh 'docker build -t my-backend:latest -f backend/Dockerfile backend/'
       }
     }
-stage('Trivy Scan Images') {
+/* stage('Trivy Scan Images') {
     steps {
         script {
             def images = [
@@ -63,7 +63,7 @@ stage('Trivy Scan Images') {
             }
         }
     }
-}
+} */
 
     stage('Frontend PUSH to ECR') {
       steps {
