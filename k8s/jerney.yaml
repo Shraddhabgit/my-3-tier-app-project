@@ -97,7 +97,7 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: postgres
-          image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-db
+          image: 16-alpine
           ports:
             - containerPort: 5432
               protocol: TCP
