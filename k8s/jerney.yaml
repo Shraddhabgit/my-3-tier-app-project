@@ -97,7 +97,7 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: postgres
-          image: postgres:16-alpine
+          image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-db
           ports:
             - containerPort: 5432
               protocol: TCP
@@ -200,7 +200,7 @@ spec:
               echo "DB is ready!"
       containers:
         - name: backend
-          image: ghcr.io/iam-veeramalla/Jerney/jerney-backend:75da1da
+          image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-backend
           ports:
             - containerPort: 5000
               protocol: TCP
@@ -307,7 +307,7 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: frontend
-          image: ghcr.io/iam-veeramalla/Jerney/jerney-frontend:75da1da
+          image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-frontend
           ports:
             - containerPort: 8080
               protocol: TCP
