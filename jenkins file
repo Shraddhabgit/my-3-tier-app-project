@@ -26,6 +26,16 @@ pipeline {
         }
 }
 }
+stage('Quality Gate') {
+            steps {
+                script {
+                    // This will wait for SonarQube to finish analysis
+                    // and fail the pipeline if the Quality Gate fails
+                    def qg = waitForQualityGate abortPipeline: true
+                    echo "Quality Gate status: ${qg.status}"
+                }
+            }
+        }
 
     stage('Frontend docker build ') {
       steps {
@@ -65,10 +75,10 @@ pipeline {
         }
     }
   }
-    post {
-    success {
-        archiveArtifacts artifacts: '.scannerwork/report-task.txt', fingerprint: true
-        build job: 'QualityGateCheck', propagate: false
-       }
-     }
 }
+}
+
+
+
+
+
