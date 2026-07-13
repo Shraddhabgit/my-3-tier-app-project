@@ -100,12 +100,17 @@ stage('Update K8s Manifests') {
                 # Update the YAML file directly
                  sed -i "s|image: .*frontend.*|image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-frontend:latest|" k8s/jerney.yaml
                 sed -i "s|image: .*backend.*|image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-backend:latest|" k8s/jerney.yaml
+        '''
 
             # Commit and push changes
-             git add k8s/jerney.yaml
-             git commit -m "Update images in single YAML"
-             git push origin main
-        '''
+withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+  sh '''
+    git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/Shraddhabgit/my-3-tier-app-project.git
+    git add k8s/jerney.yaml
+   git commit -m "Update images in single YAML"
+    git push origin main
+  '''
+}
     }
 }
   }
