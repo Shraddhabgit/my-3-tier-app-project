@@ -99,8 +99,8 @@ stage('Update K8s Manifests') {
        
             sed -i "s|image: .*frontend.*|image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-frontend:latest|" k8s/jerney.yaml
             sed -i "s|image: .*backend.*|image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-backend:latest|" k8s/jerney.yaml
-            cd $workspace
-            cd k8s
+            cd workspace
+            cd my-3-tier-app-project/k8s
             git commit -m "Update images in single YAML"
             git push origin main
         '''
