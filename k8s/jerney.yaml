@@ -200,7 +200,7 @@ spec:
               echo "DB is ready!"
       containers:
         - name: backend
-          image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-backend
+          image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-backend:latest
           ports:
             - containerPort: 5000
               protocol: TCP
@@ -307,7 +307,7 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: frontend
-          image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-frontend
+          image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-frontend:latest
           ports:
             - containerPort: 8080
               protocol: TCP
