@@ -96,15 +96,15 @@ stage('Quality Gate') {
 stage('Update K8s Manifests') {
     steps {
         sh '''
-            cd "$WORKSPACE/my-3-tier-app-project"
-          # Update the YAML file directly
-           sed -i "s|image: .*frontend.*|image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-frontend:latest|" k8s/jerney.yaml
-           sed -i "s|image: .*backend.*|image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-backend:latest|" k8s/jerney.yaml
+         cd "$WORKSPACE"
+                # Update the YAML file directly
+                 sed -i "s|image: .*frontend.*|image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-frontend:latest|" k8s/jerney.yaml
+                sed -i "s|image: .*backend.*|image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-backend:latest|" k8s/jerney.yaml
 
-           # Commit and push changes
-            git add k8s/jerney.yaml
-            git commit -m "Update images in single YAML"
-            git push origin main
+            # Commit and push changes
+             git add k8s/jerney.yaml
+             git commit -m "Update images in single YAML"
+             git push origin main
         '''
     }
 }
