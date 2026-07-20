@@ -60,6 +60,7 @@ stage('Quality Gate') {
                     echo "🔍 Scanning ${img} with Trivy..."
                     trivy image --exit-code 1 --severity HIGH,CRITICAL ${img}
                 """
+                fortesting
             }
         }
     }
