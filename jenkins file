@@ -93,6 +93,15 @@ stage('Quality Gate') {
     '''
         }
     }
+stage('Configure Git Identity') {
+  steps {
+    sh '''
+      git config --global user.name "shraddha"
+      git config --global user.email "shraddhabodke99@gmail.com"
+      git config --list
+    '''
+  }
+}
 
 stage('Update K8s Manifests') {
     steps {
