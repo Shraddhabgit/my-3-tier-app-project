@@ -41,13 +41,19 @@ stage('Quality Gate') {
         }
 
     stage('Frontend docker build ') {
-     agent { docker { image 'docker:20.10' args '-v /var/run/docker.sock:/var/run/docker.sock' } }
+     agent { docker { 
+             image 'docker:20.10' 
+             args '-v /var/run/docker.sock:/var/run/docker.sock'
+            } }
       steps {
         sh 'docker build -t my-frontend:latest -f frontend/Dockerfile frontend/'
       }
     }
     stage('Backend docker build ') {
-     agent { docker { image 'docker:20.10' args '-v /var/run/docker.sock:/var/run/docker.sock' } }
+     agent { docker {
+       image 'docker:20.10'  
+        args '-v /var/run/docker.sock:/var/run/docker.sock'
+        } }
       steps {
         sh 'docker build -t my-backend:latest -f backend/Dockerfile backend/'
       }
@@ -72,7 +78,10 @@ stage('Quality Gate') {
 } */
 
     stage('Frontend PUSH to ECR') {
-      agent { docker { image 'amazon/aws-cli:latest' args '-v /var/run/docker.sock:/var/run/docker.sock' } }
+      agent { docker { 
+          image 'amazon/aws-cli:latest' 
+          args '-v /var/run/docker.sock:/var/run/docker.sock' 
+          } }
       steps {
          sh '''
       # Login to ECR
@@ -89,7 +98,10 @@ stage('Quality Gate') {
       }
     }
     stage('Backend Push to ECR'){
-   agent { docker { image 'amazon/aws-cli:latest' args '-v /var/run/docker.sock:/var/run/docker.sock' } }
+   agent { docker {  
+           image 'amazon/aws-cli:latest' 
+           args '-v /var/run/docker.sock:/var/run/docker.sock'
+            } }
         steps{
             sh '''
             docker tag my-backend:latest \
