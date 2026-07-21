@@ -2,10 +2,7 @@ pipeline {
   agent none
   stages {
     stage('checkout') {
-    agent { docker { image 'alpine/git:latest' } }
-     tools {
-        git 'Default'   // must match the name you set in Global Tool Config
-        }
+    agent any
       steps {
     git branch: 'main',
         url: 'https://github.com/Shraddhabgit/my-3-tier-app-project',
