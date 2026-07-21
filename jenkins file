@@ -1,7 +1,8 @@
 pipeline {
-  agent any
+  agent none
   stages {
     stage('checkout') {
+    agent { docker { image 'alpine/git:latest' } }
       steps {
     git branch: 'main',
         url: 'https://github.com/Shraddhabgit/my-3-tier-app-project',
@@ -10,6 +11,7 @@ pipeline {
     }
 
  stage('sonarqube'){
+   agent { docker { image 'sonarsource/sonar-scanner-cli:latest' } }
         steps{
             withSonarQubeEnv('sonarqube') {   // Must match the server name in Jenkins config
             withCredentials([string(credentialsId: 'sonar-cred', variable: 'SONAR_TOKEN')]) {
@@ -27,6 +29,7 @@ pipeline {
 }
 }
 stage('Quality Gate') {
+ agent { docker { image 'openjdk:11-jre-slim' } }
             steps {
                 script {
                     // This will wait for SonarQube to finish analysis
@@ -38,11 +41,13 @@ stage('Quality Gate') {
         }
 
     stage('Frontend docker build ') {
+     agent { docker { image 'docker:20.10' args '-v /var/run/docker.sock:/var/run/docker.sock' } }
       steps {
         sh 'docker build -t my-frontend:latest -f frontend/Dockerfile frontend/'
       }
     }
     stage('Backend docker build ') {
+     agent { docker { image 'docker:20.10' args '-v /var/run/docker.sock:/var/run/docker.sock' } }
       steps {
         sh 'docker build -t my-backend:latest -f backend/Dockerfile backend/'
       }
@@ -67,6 +72,7 @@ stage('Quality Gate') {
 } */
 
     stage('Frontend PUSH to ECR') {
+      agent { docker { image 'amazon/aws-cli:latest' args '-v /var/run/docker.sock:/var/run/docker.sock' } }
       steps {
          sh '''
       # Login to ECR
@@ -83,6 +89,7 @@ stage('Quality Gate') {
       }
     }
     stage('Backend Push to ECR'){
+   agent { docker { image 'amazon/aws-cli:latest' args '-v /var/run/docker.sock:/var/run/docker.sock' } }
         steps{
             sh '''
             docker tag my-backend:latest \
@@ -95,6 +102,7 @@ stage('Quality Gate') {
     }
 
 stage('Update K8s Manifests') {
+ agent { docker { image 'alpine:latest' } }
     steps {
         sh '''
          cd "$WORKSPACE"
