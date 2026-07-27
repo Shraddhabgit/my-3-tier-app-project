@@ -19,12 +19,11 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region = "ap-south-1"
 
   default_tags {
     tags = {
       Project     = "Jerney"
-      Environment = var.environment
       ManagedBy   = "Terraform"
     }
   }
