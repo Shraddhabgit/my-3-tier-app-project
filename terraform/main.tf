@@ -1,82 +1,102 @@
-# ==============================================================
-# Jerney EKS Cluster - Auto Mode
-# ==============================================================
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
 
-data "aws_availability_zones" "available" {
+    principals {
+      type        = "Service"
+      identifiers = ["eks.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "example" {
+  name               = "eks-cluster-cloud"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
+
+resource "aws_iam_role_policy_attachment" "example-AmazonEKSClusterPolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.example.name
+}
+
+#get vpc data
+data "aws_vpc" "default" {
+  default = true
+}
+#get public subnets for cluster
+data "aws_subnets" "public" {
   filter {
-    name   = "opt-in-status"
-    values = ["opt-in-not-required"]
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
   }
 }
+#cluster provision
+resource "aws_eks_cluster" "example" {
+  name     = "EKS_CLUSTER"
+  role_arn = aws_iam_role.example.arn
 
-locals {
-  azs = slice(data.aws_availability_zones.available.names, 0, 3)
-}
-
-# ---- VPC ----
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.0"
-
-  name = "${var.cluster_name}-vpc"
-  cidr = var.vpc_cidr
-
-  azs             = local.azs
-  private_subnets = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 4, k)]
-  public_subnets  = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 8, k + 48)]
-
-  enable_nat_gateway = true
-  single_nat_gateway = true # Cost-saving for dev; use one per AZ for prod
-
-  # Tags required for EKS Auto Mode to discover subnets
-  public_subnet_tags = {
-    "kubernetes.io/role/elb" = 1
+  vpc_config {
+    subnet_ids = data.aws_subnets.public.ids
   }
 
-  private_subnet_tags = {
-    "kubernetes.io/role/internal-elb" = 1
-  }
-}
-
-# ---- EKS Cluster (Auto Mode) ----
-module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.31"
-
-  cluster_name    = var.cluster_name
-  cluster_version = var.cluster_version
-
-  # Auto Mode — EKS manages node groups, kube-proxy, CoreDNS, etc.
-  cluster_compute_config = {
-    enabled    = true
-    node_pools = ["general-purpose", "system"]
-  }
-
-  # Networking
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
-
-  # Security: enable private endpoint, public for initial kubectl access
-  cluster_endpoint_public_access  = true
-  cluster_endpoint_private_access = true
-
-  # Auth mode required for Auto Mode
-  authentication_mode = "API"
-
-  # Security: envelope encryption for secrets at rest
-  cluster_encryption_config = {
-    resources = ["secrets"]
-  }
-
-  # Security: enable logging
-  cluster_enabled_log_types = [
-    "api",
-    "audit",
-    "authenticator",
-    "controllerManager",
-    "scheduler"
+  # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
+  # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
+  depends_on = [
+    aws_iam_role_policy_attachment.example-AmazonEKSClusterPolicy,
   ]
+}
 
-  # Allow current caller (your IAM user/role) to manage the cluster
-  enable_cluster_creator_admin_permissions = true
+resource "aws_iam_role" "example1" {
+  name = "eks-node-group-cloud"
+
+  assume_role_policy = jsonencode({
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+    Version = "2012-10-17"
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "example-AmazonEKSWorkerNodePolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.example1.name
+}
+
+resource "aws_iam_role_policy_attachment" "example-AmazonEKS_CNI_Policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.example1.name
+}
+
+resource "aws_iam_role_policy_attachment" "example-AmazonEC2ContainerRegistryReadOnly" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.example1.name
+}
+
+#create node group
+resource "aws_eks_node_group" "example" {
+  cluster_name    = aws_eks_cluster.example.name
+  node_group_name = "Node-cloud"
+  node_role_arn   = aws_iam_role.example1.arn
+  subnet_ids      = data.aws_subnets.public.ids
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 2
+    min_size     = 1
+  }
+  instance_types = ["c7i-flex.large"]
+
+  # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
+  # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
+  depends_on = [
+    aws_iam_role_policy_attachment.example-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.example-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.example-AmazonEC2ContainerRegistryReadOnly,
+  ]
 }
