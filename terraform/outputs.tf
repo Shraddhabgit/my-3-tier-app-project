@@ -22,7 +22,8 @@ output "vpc_id" {
 output "region" {
   description = "AWS region"
   value       = var.aws_region
-} /*
+} 
+*/
 
 # Use this command to configure kubectl after apply:
 # aws eks update-kubeconfig --region <region> --name <cluster_name>
