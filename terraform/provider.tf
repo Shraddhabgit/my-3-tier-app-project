@@ -18,7 +18,7 @@ terraform {
   # }
 }
 
-provider "aws" {
+/* provider "aws" {
   region = "ap-south-1"
 
   default_tags {
@@ -27,4 +27,4 @@ provider "aws" {
       ManagedBy   = "Terraform"
     }
   }
-}
+} */
