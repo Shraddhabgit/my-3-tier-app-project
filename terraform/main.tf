@@ -7,7 +7,7 @@ data "aws_vpc" "default" {
   default = true
 }
 
-# Public subnets (for NAT gateway, load balancers, etc.)
+# Public subnets (optional, for load balancers/NAT)
 data "aws_subnets" "public" {
   filter {
     name   = "vpc-id"
@@ -15,17 +15,17 @@ data "aws_subnets" "public" {
   }
 }
 
-# Create private subnets
+# Private subnets carved inside 172.31.0.0/16
 resource "aws_subnet" "private1" {
   vpc_id                  = data.aws_vpc.default.id
-  cidr_block              = "10.0.1.0/24"
+  cidr_block              = "172.31.1.0/24"
   availability_zone       = "ap-south-1a"
   map_public_ip_on_launch = false
 }
 
 resource "aws_subnet" "private2" {
   vpc_id                  = data.aws_vpc.default.id
-  cidr_block              = "10.0.2.0/24"
+  cidr_block              = "172.31.2.0/24"
   availability_zone       = "ap-south-1b"
   map_public_ip_on_launch = false
 }
