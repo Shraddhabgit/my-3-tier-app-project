@@ -1,30 +1,36 @@
 provider "aws" {
   region = "ap-south-1"
 }
+
+# Use default VPC
+data "aws_vpc" "default" {
+  default = true
+}
+
+# Public subnets (for NAT gateway, load balancers, etc.)
+data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+# Create private subnets
 resource "aws_subnet" "private1" {
-  vpc_id            = data.aws_vpc.default.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "ap-south-1a"
+  vpc_id                  = data.aws_vpc.default.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "ap-south-1a"
   map_public_ip_on_launch = false
 }
 
 resource "aws_subnet" "private2" {
-  vpc_id            = data.aws_vpc.default.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "ap-south-1b"
+  vpc_id                  = data.aws_vpc.default.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "ap-south-1b"
   map_public_ip_on_launch = false
 }
-# Create EKS cluster (AWS will manage control plane IAM automatically)
-resource "aws_eks_cluster" "example" {
-  name     = "EKS_CLUSTER"
-  role_arn = aws_iam_role.eks_cluster.arn
 
-  vpc_config {
-    subnet_ids = data.aws_subnets.public.ids
-  }
-}
-
-# Cluster IAM role (only trust EKS service)
+# Cluster IAM role
 resource "aws_iam_role" "eks_cluster" {
   name = "eks-cluster-role"
 
@@ -43,15 +49,21 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-# Fargate profile (no EC2 nodes needed)
-resource "aws_eks_fargate_profile" "default" {
-  cluster_name           = aws_eks_cluster.example.name
-  fargate_profile_name   = "default"
-  pod_execution_role_arn = aws_iam_role.eks_fargate.arn
+# Create EKS cluster using private subnets
+resource "aws_eks_cluster" "example" {
+  name     = "EKS_CLUSTER"
+  role_arn = aws_iam_role.eks_cluster.arn
 
-  selector {
-    namespace = "default"
+  vpc_config {
+    subnet_ids = [
+      aws_subnet.private1.id,
+      aws_subnet.private2.id
+    ]
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_cluster_policy,
+  ]
 }
 
 # Fargate execution role
@@ -73,14 +85,18 @@ resource "aws_iam_role_policy_attachment" "eks_fargate_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
 }
 
-# VPC + subnets (simplified)
-data "aws_vpc" "default" {
-  default = true
-}
+# Fargate profile (must use private subnets)
+resource "aws_eks_fargate_profile" "default" {
+  cluster_name           = aws_eks_cluster.example.name
+  fargate_profile_name   = "default"
+  pod_execution_role_arn = aws_iam_role.eks_fargate.arn
 
-data "aws_subnets" "public" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
+  subnet_ids = [
+    aws_subnet.private1.id,
+    aws_subnet.private2.id
+  ]
+
+  selector {
+    namespace = "default"
   }
 }
