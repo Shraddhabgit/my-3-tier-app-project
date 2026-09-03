@@ -1,20 +1,6 @@
-Unified Jenkins Pipeline Flow:
+OWAS ZAP commands for full scan
 
-1) Checkout code for frontend, backend, and DB.
 
-2) Build & test each tier.
-
-3) Dockerize & push images to ECR.
-
-4) Update manifests (frontend-deployment.yaml, backend-deployment.yaml, db-statefulset.yaml).
-
-5) Commit & push manifest changes to Git.
-
-6) ArgoCD syncs and applies changes to staging/production cluster.
-
-7) For jenkins, Do not use “Trigger builds remotely” unless you want to call /build?token=... manually. Instead Under Build Triggers, check:
-
-GitHub hook trigger for GITScm polling (preferred).
-
-8) It's working
+sudo docker run -v $(pwd):/zap/wrk/:rw -t zaproxy/zap-stable \
+  zap-full-scan.py -t http://3.108.250.169:80 -r zap_full_report.html
 
