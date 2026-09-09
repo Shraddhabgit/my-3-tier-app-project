@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/<your-org>/<your-repo>.git'
+    repoURL: 'https://github.com/Shraddhabgit/my-3-tier-app-project.git'
     targetRevision: main
     path: k8s   # relative path to your manifests
   destination:
