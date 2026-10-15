@@ -71,14 +71,14 @@ stage('Quality Gate') {
          sh '''
       # Login to ECR
       aws ecr get-login-password --region ap-south-1 | \
-        docker login --username AWS --password-stdin 269744751587.dkr.ecr.ap-south-1.amazonaws.com
+        docker login --username AWS --password-stdin 050157673277.dkr.ecr.ap-south-1.amazonaws.com
 
       # Tag image
       docker tag my-frontend:latest \
-        269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-frontend:latest
+        050157673277.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-frontend:latest
 
       # Push image
-      docker push 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-frontend:latest
+      docker push 050157673277.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-frontend:latest
     '''
       }
     }
@@ -86,10 +86,10 @@ stage('Quality Gate') {
         steps{
             sh '''
             docker tag my-backend:latest \
-        269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-backend:latest
+        050157673277.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-backend:latest
 
       # Push image
-      docker push 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-backend:latest
+      docker push 050157673277.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-backend:latest
     '''
         }
     }
@@ -108,8 +108,8 @@ stage('Update K8s Manifests') {
         sh '''
          cd "$WORKSPACE"
                 # Update the YAML file directly
-                 sed -i "s|image: .*frontend.*|image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-frontend|" k8s/jerney.yaml
-                sed -i "s|image: .*backend.*|image: 269744751587.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-backend|" k8s/jerney.yaml
+                 sed -i "s|image: .*frontend.*|image: 050157673277.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-frontend|" k8s/jerney.yaml
+                sed -i "s|image: .*backend.*|image: 050157673277.dkr.ecr.ap-south-1.amazonaws.com/my-3-tier-app-backend|" k8s/jerney.yaml
         '''
 
             
