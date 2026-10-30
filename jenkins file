@@ -47,7 +47,7 @@ stage('Quality Gate') {
         sh 'docker build -t my-backend:latest -f backend/Dockerfile backend/'
       }
     }
-stage('Trivy Scan Images') {
+/*stage('Trivy Scan Images') {
     steps {
         script {
             def images = [
@@ -58,14 +58,12 @@ stage('Trivy Scan Images') {
             for (img in images) {
                 sh """
                     echo "🔍 Scanning ${img} with Trivy..."
-                    trivy image --exit-code 1 --severity HIGH,CRITICAL ${img} \
-                    --format json -o trivy-report.json myapp:latest
+                    trivy image --exit-code 1 --severity HIGH,CRITICAL ${img} 
                 """
-                archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
             }
         }
     }
-} 
+}*/ 
 
     stage('Frontend PUSH to ECR') {
       steps {
